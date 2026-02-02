@@ -1,0 +1,675 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ribbon NPC</title>
+  <style>
+    :root{
+      --bg: #0b1020;
+      --panel: rgba(255,255,255,0.08);
+      --panel2: rgba(255,255,255,0.12);
+      --text: #eef2ff;
+      --muted: rgba(238,242,255,0.75);
+      --accent: #7dd3fc;
+      --accent2: #a78bfa;
+      --good: #34d399;
+      --warn: #fbbf24;
+      --bad: #fb7185;
+
+      --radius: 18px;
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+      --max: 980px;
+      --tap: 56px;
+      font-synthesis-weight: none;
+    }
+
+    * { box-sizing: border-box; }
+    body{
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color: var(--text);
+      background:
+        radial-gradient(1000px 600px at 10% 10%, rgba(167,139,250,0.25), transparent 60%),
+        radial-gradient(1000px 600px at 90% 20%, rgba(125,211,252,0.22), transparent 60%),
+        radial-gradient(900px 700px at 50% 100%, rgba(52,211,153,0.12), transparent 55%),
+        var(--bg);
+      min-height: 100vh;
+    }
+
+    header{
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 28px 18px 8px;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand{
+      display:flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .brand h1{
+      margin: 0;
+      font-size: 1.25rem;
+      letter-spacing: 0.3px;
+    }
+
+    .brand p{
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .pill{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,0.10);
+      box-shadow: var(--shadow);
+      font-size: 0.95rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    main{
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 14px 18px 38px;
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 18px;
+    }
+
+    @media (max-width: 900px){
+      main{ grid-template-columns: 1fr; }
+      header{ flex-direction: column; align-items: flex-start; }
+      .pill{ width: 100%; justify-content: space-between; }
+    }
+
+    .card{
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    /* NPC stage */
+    .stage{
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .npcWrap{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    @media (max-width: 700px){
+      .npcWrap{ grid-template-columns: 1fr; }
+    }
+
+    .npcCard{
+      padding: 14px;
+      display: grid;
+      grid-template-columns: 132px 1fr;
+      gap: 14px;
+      align-items: center;
+      background: linear-gradient(135deg, rgba(125,211,252,0.12), rgba(167,139,250,0.10));
+      border-radius: calc(var(--radius) - 6px);
+      border: 1px solid rgba(255,255,255,0.10);
+      position: relative;
+    }
+
+    .npcTap{
+      width: 132px;
+      height: 132px;
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(255,255,255,0.20), transparent 45%),
+        linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+      overflow: hidden;
+      cursor: pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.06s ease;
+    }
+    .npcTap:active{ transform: translateY(1px) scale(0.995); }
+
+    .npcTap img{
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display:block;
+    }
+
+    .npcMeta h2{
+      margin: 0 0 4px;
+      font-size: 1.1rem;
+    }
+    .npcMeta p{
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.35;
+      font-size: 0.98rem;
+    }
+
+    .bubble{
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(0,0,0,0.25);
+      border: 1px solid rgba(255,255,255,0.10);
+      min-height: 130px;
+      display:flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .bubbleHeader{
+      display:flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .dialog{
+      margin: 0;
+      font-size: 1.02rem;
+      line-height: 1.4;
+    }
+
+    .choices{
+      display:flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: auto;
+    }
+
+    button{
+      appearance:none;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.10);
+      color: var(--text);
+      border-radius: 14px;
+      padding: 10px 12px;
+      min-height: 44px;
+      cursor: pointer;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      transition: background 0.12s ease, transform 0.06s ease;
+    }
+    button:hover{ background: rgba(255,255,255,0.14); }
+    button:active{ transform: translateY(1px); }
+    button.primary{
+      background: linear-gradient(135deg, rgba(125,211,252,0.28), rgba(167,139,250,0.28));
+      border-color: rgba(255,255,255,0.18);
+    }
+
+    /* Right panel */
+    .panel{
+      padding: 16px;
+      display:flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .tabs{
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .tab{
+      flex: 1 1 auto;
+      text-align:center;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.10);
+      color: var(--muted);
+      font-weight: 700;
+      cursor: pointer;
+      min-height: 44px;
+    }
+    .tab.active{
+      background: rgba(255,255,255,0.14);
+      color: var(--text);
+      border-color: rgba(255,255,255,0.16);
+    }
+
+    .list{
+      display:flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .ribbon{
+      display:flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 12px;
+      border-radius: 16px;
+      background: rgba(0,0,0,0.22);
+      border: 1px solid rgba(255,255,255,0.10);
+    }
+
+    .badge{
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size: 1.2rem;
+      background: linear-gradient(135deg, rgba(125,211,252,0.20), rgba(167,139,250,0.18));
+      border: 1px solid rgba(255,255,255,0.12);
+      flex: 0 0 auto;
+    }
+
+    .ribbon h3{
+      margin: 0 0 4px;
+      font-size: 1.0rem;
+    }
+    .ribbon p{
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.35;
+    }
+
+    .actions{
+      display:flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .mini{
+      padding: 8px 10px;
+      border-radius: 12px;
+      min-height: 38px;
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+    .done{ border-color: rgba(52,211,153,0.35); }
+    .work{ border-color: rgba(251,191,36,0.35); }
+    .clear{ border-color: rgba(251,113,133,0.35); }
+
+    footer{
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 8px 18px 30px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      display:flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    a{ color: var(--accent); text-decoration: none; }
+    a:hover{ text-decoration: underline; }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="brand">
+      <h1>🎀 Ribbon NPC</h1>
+      <p>Tap the NPC to chat • Track your progress • Earn ribbons</p>
+    </div>
+
+    <div class="pill" id="progressPill">
+      <span>📌 Progress</span>
+      <strong id="progressText">0 done • 0 working</strong>
+    </div>
+  </header>
+
+  <main>
+    <!-- Left: NPC interaction -->
+    <section class="card stage">
+      <div class="npcWrap">
+        <div class="npcCard">
+          <div class="npcTap" id="npcTap" aria-label="Tap the NPC">
+            <!-- Replace npc.png with your actual image -->
+            <img src="assets/npc.png" alt="Ribbon NPC" onerror="this.style.display='none'; this.parentElement.textContent='🧑‍🎤'; this.parentElement.style.fontSize='54px';" />
+          </div>
+          <div class="npcMeta">
+            <h2 id="npcName">Ribbon Keeper</h2>
+            <p id="npcTagline">“Collect ribbons by completing fun challenges around the con!”</p>
+          </div>
+        </div>
+
+        <div class="bubble">
+          <div class="bubbleHeader">
+            <span>💬 Dialogue</span>
+            <span id="dialogHint">Tap the NPC</span>
+          </div>
+          <p class="dialog" id="dialogText">
+            Welcome, traveler! 🎀 I’m the Ribbon Keeper. Tap me to begin.
+          </p>
+
+          <div class="choices">
+            <button class="primary" id="choiceMore" disabled>✨ Tell me about ribbons</button>
+            <button id="choiceList" disabled>📜 Show ribbon list</button>
+            <button id="choiceTrack" disabled>🎯 Track my ribbons</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right: Ribbon list + tracking -->
+    <aside class="card panel">
+      <div class="tabs" role="tablist" aria-label="Ribbon tabs">
+        <div class="tab active" id="tabList" role="tab" tabindex="0">📜 Ribbons</div>
+        <div class="tab" id="tabTrack" role="tab" tabindex="0">🎯 Tracking</div>
+      </div>
+
+      <div id="panelContent"></div>
+    </aside>
+  </main>
+
+  <footer>
+    <span>🧩 Tip: This is a single file. Add images to <code>assets/</code> and deploy anywhere.</span>
+    <span><a href="#" id="resetLink">Reset demo data</a></span>
+  </footer>
+
+<script>
+(() => {
+  // --- Demo ribbon data (replace later, or load via CSV) ---
+  const RIBBONS = [
+    { id: "r1", icon: "🎨", name: "Artist Alley Explorer", desc: "Visit 5 artist booths and scan their QR codes." },
+    { id: "r2", icon: "📸", name: "Cosplay Snapshot", desc: "Take a photo at the official photo wall." },
+    { id: "r3", icon: "🧠", name: "Trivia Challenger", desc: "Answer 3 trivia questions at the info desk." },
+    { id: "r4", icon: "🧋", name: "Snack Sidequest", desc: "Try a featured vendor item and rate it." },
+    { id: "r5", icon: "🤝", name: "Community Helper", desc: "Help someone find a panel room or booth." }
+  ];
+
+  // --- localStorage keys ---
+  const LS_KEY = "ribbonNpcTracking_v1";
+
+  // tracking state: { done: Set, working: Set }
+  const state = loadState();
+
+  // --- UI elements ---
+  const npcTap = document.getElementById("npcTap");
+  const dialogText = document.getElementById("dialogText");
+  const dialogHint = document.getElementById("dialogHint");
+  const choiceMore = document.getElementById("choiceMore");
+  const choiceList = document.getElementById("choiceList");
+  const choiceTrack = document.getElementById("choiceTrack");
+
+  const tabList = document.getElementById("tabList");
+  const tabTrack = document.getElementById("tabTrack");
+  const panelContent = document.getElementById("panelContent");
+
+  const progressText = document.getElementById("progressText");
+  const resetLink = document.getElementById("resetLink");
+
+  // --- NPC dialogue scripts ---
+  const SCRIPTS = {
+    greet: [
+      "Oh! A new visitor! 🎀 Welcome to the con!",
+      "Hi there! I’m the Ribbon Keeper. Want to learn about ribbons, see the list, or track your progress?"
+    ],
+    about: [
+      "Ribbons are tiny quests you can complete during the event. ✅",
+      "Finish one and you earn bragging rights… and maybe a real ribbon at the booth 😉",
+      "You can mark ribbons as *Working On* or *Done* to keep yourself organized."
+    ],
+    list: [
+      "Here’s the ribbon list! 📜",
+      "Pick a couple that sound fun, then mark them as Working On."
+    ],
+    track: [
+      "Tracking time! 🎯",
+      "Set a ribbon to Working On when you start, and Done when you finish."
+    ]
+  };
+
+  let greeted = false;
+
+  // --- Event wiring ---
+  npcTap.addEventListener("click", () => {
+    greeted = true;
+    enableChoices(true);
+    saySequence(SCRIPTS.greet);
+    dialogHint.textContent = "Choose an option";
+  });
+
+  choiceMore.addEventListener("click", () => {
+    saySequence(SCRIPTS.about);
+  });
+
+  choiceList.addEventListener("click", () => {
+    setTab("list");
+    saySequence(SCRIPTS.list);
+  });
+
+  choiceTrack.addEventListener("click", () => {
+    setTab("track");
+    saySequence(SCRIPTS.track);
+  });
+
+  tabList.addEventListener("click", () => setTab("list"));
+  tabTrack.addEventListener("click", () => setTab("track"));
+
+  // Basic keyboard focus use
+  tabList.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") setTab("list"); });
+  tabTrack.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") setTab("track"); });
+
+  resetLink.addEventListener("click", (e) => {
+    e.preventDefault();
+    localStorage.removeItem(LS_KEY);
+    state.done.clear();
+    state.working.clear();
+    updateProgress();
+    renderPanel();
+    if (greeted) say("Reset complete. Fresh start! ✨");
+  });
+
+  // --- Initial render ---
+  updateProgress();
+  renderPanel();
+
+  // --- Functions ---
+  function enableChoices(on){
+    choiceMore.disabled = !on;
+    choiceList.disabled = !on;
+    choiceTrack.disabled = !on;
+  }
+
+  function say(text){
+    dialogText.textContent = text;
+  }
+
+  function saySequence(lines){
+    // Show first immediately, then rotate every 1.6s for a small "NPC" feel.
+    let i = 0;
+    say(lines[i]);
+    if (lines.length <= 1) return;
+
+    const token = Symbol("seq");
+    saySequence._token = token;
+
+    const tick = () => {
+      if (saySequence._token !== token) return; // cancel if a new sequence starts
+      i++;
+      if (i >= lines.length) return;
+      say(lines[i]);
+      setTimeout(tick, 1600);
+    };
+    setTimeout(tick, 1600);
+  }
+
+  function setTab(which){
+    const isList = (which === "list");
+    tabList.classList.toggle("active", isList);
+    tabTrack.classList.toggle("active", !isList);
+    renderPanel();
+  }
+
+  function renderPanel(){
+    const isListActive = tabList.classList.contains("active");
+    panelContent.innerHTML = isListActive ? renderRibbonList() : renderTracking();
+    wirePanelButtons();
+  }
+
+  function renderRibbonList(){
+    return `
+      <div class="list" aria-label="Ribbon list">
+        ${RIBBONS.map(r => renderRibbonCard(r)).join("")}
+      </div>
+    `;
+  }
+
+  function renderTracking(){
+    const done = RIBBONS.filter(r => state.done.has(r.id));
+    const working = RIBBONS.filter(r => state.working.has(r.id));
+
+    return `
+      <div class="list" aria-label="Tracking">
+        <div class="ribbon">
+          <div class="badge">✅</div>
+          <div style="flex:1">
+            <h3>Done (${done.length})</h3>
+            <p>${done.length ? done.map(x => x.name).join(", ") : "Nothing yet — pick a ribbon to finish!"}</p>
+          </div>
+        </div>
+
+        <div class="ribbon">
+          <div class="badge">🎯</div>
+          <div style="flex:1">
+            <h3>Working On (${working.length})</h3>
+            <p>${working.length ? working.map(x => x.name).join(", ") : "No active ribbons — start one!"}</p>
+          </div>
+        </div>
+
+        <div class="ribbon">
+          <div class="badge">🧭</div>
+          <div style="flex:1">
+            <h3>Next suggestion</h3>
+            <p>${suggestNext()}</p>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderRibbonCard(r){
+    const isDone = state.done.has(r.id);
+    const isWorking = state.working.has(r.id);
+
+    return `
+      <div class="ribbon" data-ribbon-id="${r.id}">
+        <div class="badge">${escapeHtml(r.icon)}</div>
+        <div style="flex:1">
+          <h3>${escapeHtml(r.name)} ${isDone ? "✅" : isWorking ? "🎯" : ""}</h3>
+          <p>${escapeHtml(r.desc)}</p>
+          <div class="actions">
+            <button class="mini work" data-action="working">${isWorking ? "Working ✔" : "Mark Working"}</button>
+            <button class="mini done" data-action="done">${isDone ? "Done ✔" : "Mark Done"}</button>
+            <button class="mini clear" data-action="clear">Clear</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function wirePanelButtons(){
+    panelContent.querySelectorAll("[data-ribbon-id]").forEach(card => {
+      const id = card.getAttribute("data-ribbon-id");
+      card.querySelectorAll("button[data-action]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const action = btn.getAttribute("data-action");
+          if (action === "working") setWorking(id);
+          if (action === "done") setDone(id);
+          if (action === "clear") clearStatus(id);
+          saveState();
+          updateProgress();
+          renderPanel();
+        });
+      });
+    });
+  }
+
+  function setWorking(id){
+    state.done.delete(id);
+    state.working.add(id);
+    say("Got it — you're working on that ribbon. 🎯");
+  }
+
+  function setDone(id){
+    state.working.delete(id);
+    state.done.add(id);
+    say("Nice! Ribbon completed. ✅🎀");
+  }
+
+  function clearStatus(id){
+    state.working.delete(id);
+    state.done.delete(id);
+    say("Cleared. Back to untracked. 🧼");
+  }
+
+  function updateProgress(){
+    progressText.textContent = `${state.done.size} done • ${state.working.size} working`;
+  }
+
+  function suggestNext(){
+    // Prefer an unstarted ribbon; else suggest finishing a working one
+    const unstarted = RIBBONS.find(r => !state.done.has(r.id) && !state.working.has(r.id));
+    if (unstarted) return `Try: "${unstarted.name}" — it’s a quick win. ✨`;
+
+    const working = RIBBONS.find(r => state.working.has(r.id));
+    if (working) return `Finish: "${working.name}" — you’re already on it. 💪`;
+
+    return "You’ve finished everything! Time to brag. 😄";
+  }
+
+  function loadState(){
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return { done: new Set(), working: new Set() };
+
+    try{
+      const obj = JSON.parse(raw);
+      return {
+        done: new Set(Array.isArray(obj.done) ? obj.done : []),
+        working: new Set(Array.isArray(obj.working) ? obj.working : [])
+      };
+    } catch {
+      return { done: new Set(), working: new Set() };
+    }
+  }
+
+  function saveState(){
+    const obj = { done: [...state.done], working: [...state.working] };
+    localStorage.setItem(LS_KEY, JSON.stringify(obj));
+  }
+
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, (m) => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"
+    }[m]));
+  }
+})();
+</script>
+</body>
+</html>

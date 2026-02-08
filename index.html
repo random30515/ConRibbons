@@ -234,7 +234,7 @@ async function loadAll(){
 
 async function loadConversations(){
   const res = await fetch("./Config/Conversations.json", { cache: "no-store" });
-  if (!res.ok) throw new Error(`conversations.json HTTP ${res.status}`);
+  if (!res.ok) throw new Error(`Conversations.json HTTP ${res.status}`);
   DIALOG = await res.json();
   if (!DIALOG.start) throw new Error("Missing node: start");
 }

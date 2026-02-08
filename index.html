@@ -219,7 +219,7 @@ elLine.insertAdjacentElement("afterend", pic);
 
 async function loadConversations(){
   try {
-    const res = await fetch("./config/conversations.json", { cache: "no-store" });
+    const res = await fetch("./Config/Conversations.json", { cache: "no-store" });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     DIALOG = await res.json();
 
@@ -234,7 +234,7 @@ async function loadConversations(){
   } catch (err) {
     elStatus.textContent = "Config load failed";
     elLine.textContent =
-      "Could not load ./config/conversations.json. Check that the file is valid JSON and committed to GitHub Pages.";
+      "Could not load ./Config/Conversations.json. Check that the file is valid JSON and committed to GitHub Pages.";
     console.error(err);
   }
 }

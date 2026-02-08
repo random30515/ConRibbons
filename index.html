@@ -180,3 +180,89 @@ async function loadConversations(){
 }
 
 function render(nodeId){
+  const node = DIALOG[nodeId];
+  if (!node) {
+    elLine.textContent = `Missing node: "${nodeId}"`;
+    elChoices.innerHTML = "";
+    elPic.style.display = "none";
+    return;
+  }
+
+  currentNodeId = nodeId;
+
+  // Keep it simple: one speaker for now (you can add speaker per node later if you want)
+  elSpeaker.textContent = "💬 Ribbon Keeper";
+  elLine.textContent = node.text ?? "";
+
+  // picture_url support
+  if (node.picture_url) {
+    elPic.src = node.picture_url;
+    elPic.style.display = "block";
+  } else {
+    elPic.style.display = "none";
+  }
+
+  // choices
+  elChoices.innerHTML = "";
+  const choices = Array.isArray(node.choices) ? node.choices : [];
+
+  choices.forEach((c, idx) => {
+    const btn = document.createElement("button");
+    btn.className = "choice";
+    btn.type = "button";
+    btn.textContent = `${idx + 1}. ${c.label}`;
+
+    btn.addEventListener("click", () => {
+      // URL choice
+      if (c.url) {
+        window.open(c.url, "_blank", "noopener,noreferrer");
+        toast(`Opened link: ${c.label}`);
+        return;
+      }
+
+      // Next node
+      if (c.next) {
+        render(c.next);
+        elStatus.textContent = "Choose an option";
+        return;
+      }
+
+      toast("Choice is missing 'next' or 'url' (config issue).");
+    });
+
+    elChoices.appendChild(btn);
+  });
+
+  // If no choices, provide a default Back
+  if (choices.length === 0) {
+    const back = document.createElement("button");
+    back.className = "choice";
+    back.type = "button";
+    back.textContent = "1. Back";
+    back.addEventListener("click", () => render("start"));
+    elChoices.appendChild(back);
+  }
+}
+
+function toast(msg){
+  elToast.textContent = msg;
+  elToast.style.display = "block";
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => elToast.style.display = "none", 2200);
+}
+
+// Keyboard: 1–9 selects options
+window.addEventListener("keydown", (e) => {
+  const n = Number(e.key);
+  if (!Number.isInteger(n) || n < 1 || n > 9) return;
+
+  const buttons = [...elChoices.querySelectorAll("button.choice")];
+  const btn = buttons[n - 1];
+  if (btn) btn.click();
+});
+
+// Start loading immediately
+loadConversations();
+</script>
+</body>
+</html>

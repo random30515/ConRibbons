@@ -405,7 +405,7 @@ function renderRibbonGrid(rows, title){
     const tile = document.createElement("div");
     tile.className = "cardTile";
 
-    const imgName = r["dealer_-_name.png"]; // your exact column name
+    const imgName = r["file_name"]; // your exact column name
     const imgPath = imgName ? `./Config/ImageRibbons/${encodeURIComponent(imgName)}` : "";
 
     tile.innerHTML = `
@@ -438,7 +438,7 @@ function renderRibbonDetail(r){
     return;
   }
 
-  const imgName = r["dealer_-_name.png"];
+  const imgName = r["file_name"];
   const imgPath = imgName ? `./Config/ImageRibbons/${encodeURIComponent(imgName)}` : "";
 
   const box = document.createElement("div");

@@ -195,81 +195,114 @@
   </div>
 
 <script>
-/**
- * CONFIG: Edit this object to change what the NPC says and what choices appear.
- * You can add more "nodes" (conversation states) later.
- */
-const DIALOG = {
-  start: {
-    speaker: "Ribbon Keeper",
-    text: "Welcome, traveler! 🎀 Want to talk about ribbons?",
-    choices: [
-      { label: "Tell me more about ribbons", next: "about" },
-      { label: "Show me the ribbon list (soon)", next: "placeholderList" },
-      { label: "Track my ribbons (soon)", next: "placeholderTrack" }
-    ]
-  },
-
-  about: {
-    speaker: "Ribbon Keeper",
-    text: "Ribbons are little challenges you can complete during the event. We’ll add the list and tracking next.",
-    choices: [
-      { label: "Back", next: "start" }
-    ]
-  },
-
-  placeholderList: {
-    speaker: "Ribbon Keeper",
-    text: "Ribbon list isn’t built yet. This button proves the dialog system works. ✅",
-    choices: [
-      { label: "Back", next: "start" }
-    ]
-  },
-
-  placeholderTrack: {
-    speaker: "Ribbon Keeper",
-    text: "Tracking isn’t built yet. We’ll add it once the basics feel right. 🎯",
-    choices: [
-      { label: "Back", next: "start" }
-    ]
-  }
-};
-
-// ---- Simple dialog engine (minimal) ----
+let DIALOG = {};
 let currentNodeId = "start";
 let isActive = false;
 
+// UI
 const elSpeaker = document.getElementById("speaker");
-const elStatus = document.getElementById("status");
-const elLine = document.getElementById("dialogLine");
+const elStatus  = document.getElementById("status");
+const elLine    = document.getElementById("dialogLine");
 const elChoices = document.getElementById("choices");
 const elNpcName = document.getElementById("npcName");
-const elNpcTap = document.getElementById("npcTap");
+const elNpcTap  = document.getElementById("npcTap");
 
-elNpcName.textContent = DIALOG.start.speaker;
+// Create an optional picture slot (simple)
+const pic = document.createElement("img");
+pic.style.width = "100%";
+pic.style.maxHeight = "260px";
+pic.style.objectFit = "contain";
+pic.style.borderRadius = "14px";
+pic.style.border = "1px solid rgba(255,255,255,0.14)";
+pic.style.display = "none";
+elLine.insertAdjacentElement("afterend", pic);
+
+async function loadConversations(){
+  try {
+    const res = await fetch("./config/conversations.json", { cache: "no-store" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    DIALOG = await res.json();
+
+    // Basic validation
+    if (!DIALOG.start || !DIALOG.start.text) {
+      throw new Error("Missing required node: start");
+    }
+
+    elNpcName.textContent = "Ribbon Keeper";
+    elStatus.textContent = "Tap the NPC";
+    elLine.textContent = "Tap the NPC to begin.";
+  } catch (err) {
+    elStatus.textContent = "Config load failed";
+    elLine.textContent =
+      "Could not load ./config/conversations.json. Check that the file is valid JSON and committed to GitHub Pages.";
+    console.error(err);
+  }
+}
 
 function render(nodeId){
   const node = DIALOG[nodeId];
-  if (!node) return;
+  if (!node) {
+    elLine.textContent = `Missing node: "${nodeId}"`;
+    elChoices.innerHTML = "";
+    pic.style.display = "none";
+    return;
+  }
 
   currentNodeId = nodeId;
 
-  elSpeaker.textContent = "💬 " + node.speaker;
-  elLine.textContent = node.text;
+  // Speaker: if not provided in JSON, keep it simple
+  elSpeaker.textContent = "💬 Ribbon Keeper";
+  elLine.textContent = node.text ?? "";
 
+  // Picture support
+  if (node.picture_url) {
+    pic.src = node.picture_url;
+    pic.style.display = "block";
+  } else {
+    pic.style.display = "none";
+  }
+
+  // Choices
   elChoices.innerHTML = "";
-  node.choices.forEach((c, idx) => {
+  const choices = Array.isArray(node.choices) ? node.choices : [];
+
+  choices.forEach((c, idx) => {
     const btn = document.createElement("button");
     btn.className = "choice";
     btn.type = "button";
     btn.textContent = `${idx + 1}. ${c.label}`;
+
     btn.addEventListener("click", () => {
-      elStatus.textContent = "…";
-      render(c.next);
-      elStatus.textContent = "Choose an option";
+      // If it's a URL choice, open it
+      if (c.url) {
+        window.open(c.url, "_blank", "noopener,noreferrer");
+        return;
+      }
+
+      // Otherwise go to next node
+      if (c.next) {
+        elStatus.textContent = "…";
+        render(c.next);
+        elStatus.textContent = "Choose an option";
+        return;
+      }
+
+      // Neither url nor next? that's a config bug
+      elStatus.textContent = "Choice misconfigured";
     });
+
     elChoices.appendChild(btn);
   });
+
+  // If no choices, show a simple back option
+  if (choices.length === 0) {
+    const back = document.createElement("button");
+    back.className = "choice";
+    back.type = "button";
+    back.textContent = "1. Back";
+    back.addEventListener("click", () => render("start"));
+    elChoices.appendChild(back);
+  }
 }
 
 function activate(){
@@ -278,12 +311,9 @@ function activate(){
   render("start");
 }
 
-// Tap NPC to begin
-elNpcTap.addEventListener("click", () => {
-  activate();
-});
+elNpcTap.addEventListener("click", activate);
 
-// Keyboard: 1/2/3 selects choices
+// Keyboard 1-9 to pick options
 window.addEventListener("keydown", (e) => {
   if (!isActive) return;
   const n = Number(e.key);
@@ -294,9 +324,9 @@ window.addEventListener("keydown", (e) => {
   if (btn) btn.click();
 });
 
-// Initial state
-elStatus.textContent = "Tap the NPC";
-elLine.textContent = "Tap the NPC to begin.";
+// Load config on startup
+loadConversations();
 </script>
+
 </body>
 </html>

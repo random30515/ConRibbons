@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ConRibbons NPC</title>
 
+  <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
+
   <style>
     :root{
       --bg: #0b1020;
@@ -123,6 +125,68 @@
       backdrop-filter: blur(4px);
       max-width: min(520px, calc(100% - 36px));
     }
+
+    #contentArea{
+      display: grid;
+      gap: 12px;
+      margin-top: 8px;
+    }
+    
+    .listButtons{
+      display: grid;
+      gap: 10px;
+    }
+    
+    .grid{
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 10px;
+    }
+    
+    .cardTile{
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.08);
+      border-radius: 14px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.06s ease, background 0.12s ease;
+    }
+    .cardTile:hover{ background: rgba(255,255,255,0.12); }
+    .cardTile:active{ transform: translateY(1px); }
+    
+    .cardTile img{
+      width: 100%;
+      height: 110px;
+      object-fit: cover;
+      display: block;
+    }
+    
+    .cardTile .label{
+      padding: 8px 10px;
+      font-weight: 700;
+      color: rgba(238,242,255,0.92);
+      font-size: 0.95rem;
+      line-height: 1.25;
+    }
+    
+    .detailBox{
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(0,0,0,0.35);
+      border-radius: 14px;
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+    }
+    
+    .detailBox .row{
+      color: rgba(238,242,255,0.88);
+    }
+    .detailBox .k{
+      color: rgba(238,242,255,0.65);
+      font-weight: 700;
+      margin-right: 8px;
+    }
+
   </style>
 </head>
 
@@ -138,6 +202,7 @@
         <p class="line" id="dialogLine">Loading…</p>
         <img id="nodePic" class="nodePic" alt="Dialog image" />
         <div class="choices" id="choices"></div>
+        <div id="contentArea"></div>
       </div>
     </section>
   </div>
@@ -148,35 +213,55 @@
 let DIALOG = {};
 let currentNodeId = "start";
 
+// CSV data
+let RIBBONS = [];
+let VIEW_STACK = []; // for "back_view"
+let CURRENT_DETAIL = null;
+
 // UI
 const elSpeaker = document.getElementById("speaker");
 const elStatus  = document.getElementById("status");
 const elLine    = document.getElementById("dialogLine");
 const elChoices = document.getElementById("choices");
-const elPic     = document.getElementById("nodePic");
-const elToast   = document.getElementById("toast");
+const elPic     = document.getElementById("nodePic");   // if you kept picture_url support
+const elContent = document.getElementById("contentArea");
+
+async function loadAll(){
+  await Promise.all([loadConversations(), loadRibbonsCsv()]);
+  elStatus.textContent = "Choose an option";
+  render("start"); // start on load
+}
 
 async function loadConversations(){
-  try {
-    // NOTE: this path is lowercase /config to match your earlier file location
-    const res = await fetch("./Config/Conversations.json", { cache: "no-store" });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    DIALOG = await res.json();
+  const res = await fetch("./Config/conversations.json", { cache: "no-store" });
+  if (!res.ok) throw new Error(`conversations.json HTTP ${res.status}`);
+  DIALOG = await res.json();
+  if (!DIALOG.start) throw new Error("Missing node: start");
+}
 
-    if (!DIALOG.start || !DIALOG.start.text) {
-      throw new Error("Missing required node: start");
-    }
+async function loadRibbonsCsv(){
+  const res = await fetch("./Config/Ribbons.csv", { cache: "no-store" });
+  if (!res.ok) throw new Error(`Ribbons.csv HTTP ${res.status}`);
+  const text = await res.text();
 
-    elStatus.textContent = "Choose an option";
-    render("start"); // Start automatically on page load ✅
-  } catch (err) {
-    elStatus.textContent = "Config load failed";
-    elLine.textContent =
-      "Could not load ./Config/Conversations.json. Check file name/case and GitHub Pages path.";
-    elChoices.innerHTML = "";
-    elPic.style.display = "none";
-    console.error(err);
+  const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
+  if (parsed.errors?.length) {
+    console.warn("CSV parse warnings:", parsed.errors);
   }
+
+  // Keep original headers. We'll access via exact names.
+  RIBBONS = (parsed.data || [])
+    .map(r => cleanRow(r))
+    .filter(r => r.name); // ignore blank rows
+}
+
+// Trim whitespace everywhere
+function cleanRow(row){
+  const out = {};
+  for (const k of Object.keys(row)) {
+    out[k] = typeof row[k] === "string" ? row[k].trim() : row[k];
+  }
+  return out;
 }
 
 function render(nodeId){
@@ -184,85 +269,222 @@ function render(nodeId){
   if (!node) {
     elLine.textContent = `Missing node: "${nodeId}"`;
     elChoices.innerHTML = "";
-    elPic.style.display = "none";
+    elContent.innerHTML = "";
     return;
   }
 
   currentNodeId = nodeId;
 
-  // Keep it simple: one speaker for now (you can add speaker per node later if you want)
   elSpeaker.textContent = "💬 Ribbon Keeper";
   elLine.textContent = node.text ?? "";
+  elStatus.textContent = "Choose an option";
 
-  // picture_url support
-  if (node.picture_url) {
-    elPic.src = node.picture_url;
-    elPic.style.display = "block";
-  } else {
-    elPic.style.display = "none";
+  // Optional picture_url support (if you kept it)
+  if (elPic) {
+    if (node.picture_url) {
+      elPic.src = node.picture_url;
+      elPic.style.display = "block";
+    } else {
+      elPic.style.display = "none";
+    }
   }
 
-  // choices
+  // Render static choices from JSON (Back, etc.)
   elChoices.innerHTML = "";
   const choices = Array.isArray(node.choices) ? node.choices : [];
-
   choices.forEach((c, idx) => {
     const btn = document.createElement("button");
     btn.className = "choice";
     btn.type = "button";
     btn.textContent = `${idx + 1}. ${c.label}`;
-
-    btn.addEventListener("click", () => {
-      // URL choice
-      if (c.url) {
-        window.open(c.url, "_blank", "noopener,noreferrer");
-        toast(`Opened link: ${c.label}`);
-        return;
-      }
-
-      // Next node
-      if (c.next) {
-        render(c.next);
-        elStatus.textContent = "Choose an option";
-        return;
-      }
-
-      toast("Choice is missing 'next' or 'url' (config issue).");
-    });
-
+    btn.addEventListener("click", () => handleChoice(c));
     elChoices.appendChild(btn);
   });
 
-  // If no choices, provide a default Back
-  if (choices.length === 0) {
-    const back = document.createElement("button");
-    back.className = "choice";
-    back.type = "button";
-    back.textContent = "1. Back";
-    back.addEventListener("click", () => render("start"));
-    elChoices.appendChild(back);
+  // Render dynamic view content
+  elContent.innerHTML = "";
+  if (node.view) renderView(node.view);
+}
+
+function handleChoice(c){
+  if (c.url) {
+    window.open(c.url, "_blank", "noopener,noreferrer");
+    return;
   }
+  if (c.action === "back_view") {
+    const prev = VIEW_STACK.pop();
+    if (prev) {
+      // Restore previous view state
+      render(prev.nodeId);
+      // then re-render that view's content (it will use prev.viewState)
+      prev.restore();
+    }
+    return;
+  }
+  if (c.next) {
+    render(c.next);
+    return;
+  }
+  elStatus.textContent = "Choice misconfigured";
 }
 
-function toast(msg){
-  elToast.textContent = msg;
-  elToast.style.display = "block";
-  clearTimeout(toast._t);
-  toast._t = setTimeout(() => elToast.style.display = "none", 2200);
+function renderView(viewName){
+  // All list/detail rendering happens here
+  if (viewName === "dealers") return renderDealers();
+  if (viewName === "fandoms") return renderFandoms();
+  if (viewName === "all_ribbons") return renderAllRibbons();
+  if (viewName === "ribbon_detail") return renderRibbonDetail(CURRENT_DETAIL);
 }
 
-// Keyboard: 1–9 selects options
+function distinctValues(field){
+  const set = new Set();
+  for (const r of RIBBONS) {
+    const v = (r[field] || "").trim();
+    if (v) set.add(v);
+  }
+  return [...set].sort((a,b) => a.localeCompare(b));
+}
+
+// ---- Views ----
+function renderDealers(){
+  const dealers = distinctValues("dealer");
+  const wrap = document.createElement("div");
+  wrap.className = "listButtons";
+
+  dealers.forEach(name => {
+    const btn = document.createElement("button");
+    btn.className = "choice";
+    btn.type = "button";
+    btn.textContent = name;
+    btn.addEventListener("click", () => {
+      pushViewState("ribbons_dealers", () => renderDealers());
+      renderRibbonGrid(RIBBONS.filter(r => r.dealer === name), `Dealer: ${name}`);
+    });
+    wrap.appendChild(btn);
+  });
+
+  elContent.appendChild(wrap);
+}
+
+function renderFandoms(){
+  const fandoms = distinctValues("fandom");
+  const wrap = document.createElement("div");
+  wrap.className = "listButtons";
+
+  fandoms.forEach(name => {
+    const btn = document.createElement("button");
+    btn.className = "choice";
+    btn.type = "button";
+    btn.textContent = name;
+    btn.addEventListener("click", () => {
+      pushViewState("ribbons_fandoms", () => renderFandoms());
+      renderRibbonGrid(RIBBONS.filter(r => r.fandom === name), `Fandom: ${name}`);
+    });
+    wrap.appendChild(btn);
+  });
+
+  elContent.appendChild(wrap);
+}
+
+function renderAllRibbons(){
+  renderRibbonGrid(RIBBONS, "All ribbons");
+}
+
+function renderRibbonGrid(rows, title){
+  elContent.innerHTML = "";
+
+  const heading = document.createElement("div");
+  heading.className = "detailBox";
+  heading.innerHTML = `<div class="row"><span class="k">${escapeHtml(title)}</span> (${rows.length})</div>`;
+  elContent.appendChild(heading);
+
+  const grid = document.createElement("div");
+  grid.className = "grid";
+
+  rows.forEach(r => {
+    const tile = document.createElement("div");
+    tile.className = "cardTile";
+
+    const imgName = r["dealer_-_name.png"]; // your exact column name
+    const imgPath = imgName ? `./Config/ImageRibbons/${encodeURIComponent(imgName)}` : "";
+
+    tile.innerHTML = `
+      <img src="${imgPath}" alt="${escapeHtml(r.name || "Ribbon")}" onerror="this.style.display='none';" />
+      <div class="label">${escapeHtml(r.name || "(unnamed)")}</div>
+    `;
+
+    tile.addEventListener("click", () => {
+      // Save how we got here so "Back to previous list" works
+      pushViewState(currentNodeId, () => {
+        // We don't know which list function, but the caller pushed before entering the grid for dealer/fandom.
+        // For All, we’ll just re-render all.
+        if (currentNodeId === "ribbons_all") renderAllRibbons();
+      });
+
+      CURRENT_DETAIL = r;
+      render("ribbon_detail");
+    });
+
+    grid.appendChild(tile);
+  });
+
+  elContent.appendChild(grid);
+}
+
+function renderRibbonDetail(r){
+  elContent.innerHTML = "";
+  if (!r) {
+    elContent.textContent = "No ribbon selected.";
+    return;
+  }
+
+  const imgName = r["dealer_-_name.png"];
+  const imgPath = imgName ? `./Config/ImageRibbons/${encodeURIComponent(imgName)}` : "";
+
+  const box = document.createElement("div");
+  box.className = "detailBox";
+  box.innerHTML = `
+    <img src="${imgPath}" alt="${escapeHtml(r.name || "Ribbon")}" style="width:100%;max-height:320px;object-fit:contain;border-radius:14px;border:1px solid rgba(255,255,255,0.14);" />
+    <div class="row"><span class="k">Name:</span> ${escapeHtml(r.name || "")}</div>
+    <div class="row"><span class="k">Dealer:</span> ${escapeHtml(r.dealer || "")}</div>
+    <div class="row"><span class="k">Dealer cosplay:</span> ${escapeHtml(r["dealer-cosplay"] || "")}</div>
+    <div class="row"><span class="k">Fandom:</span> ${escapeHtml(r.fandom || "")}</div>
+    <div class="row"><span class="k">Type:</span> ${escapeHtml(r.type || "")}</div>
+    <div class="row"><span class="k">Days:</span> ${escapeHtml(r.days || "")}</div>
+    <div class="row"><span class="k">How to earn:</span><br>${escapeHtml(r["how-to-earn"] || "")}</div>
+  `;
+  elContent.appendChild(box);
+}
+
+function pushViewState(nodeId, restoreFn){
+  VIEW_STACK.push({ nodeId, restore: restoreFn });
+}
+
+// Keyboard: 1–9 selects visible buttons (choices first, then view buttons)
 window.addEventListener("keydown", (e) => {
   const n = Number(e.key);
   if (!Number.isInteger(n) || n < 1 || n > 9) return;
 
-  const buttons = [...elChoices.querySelectorAll("button.choice")];
+  const buttons = [
+    ...elChoices.querySelectorAll("button.choice"),
+    ...elContent.querySelectorAll("button.choice")
+  ];
   const btn = buttons[n - 1];
   if (btn) btn.click();
 });
 
-// Start loading immediately
-loadConversations();
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, (m) => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"
+  }[m]));
+}
+
+loadAll().catch(err => {
+  elStatus.textContent = "Load failed";
+  elLine.textContent = "Could not load config or CSV. Check paths/case and commits.";
+  console.error(err);
+});
 </script>
+
 </body>
 </html>

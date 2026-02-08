@@ -152,6 +152,7 @@
 
   "ribbons_dealers": {
     "text": "Sure — dealer list isn’t wired yet. (Placeholder)",
+    "view": "dealers",
     "choices": [
       { "label": "Back", "next": "ribbons" }
     ]
@@ -159,6 +160,7 @@
 
   "ribbons_fandom": {
     "text": "Sure — fandom list isn’t wired yet. (Placeholder)",
+    "view": "fandoms",
     "choices": [
       { "label": "Back", "next": "ribbons" }
     ]
@@ -166,10 +168,20 @@
 
   "ribbons_all": {
     "text": "All-ribbons list isn’t wired yet. (Placeholder)",
+    "view": "all_ribbons",
     "choices": [
       { "label": "Back", "next": "ribbons" }
     ]
   },
+
+  "ribbon_detail": {
+    "text": "Ribbon details:",
+    "view": "ribbon_detail",
+    "choices": [
+      { "label": "Back to previous list", "action": "back_view" },
+      { "label": "Back", "next": "ribbons" }
+    ]
+  },  
 
   "events": {
     "text": "Of course! There are Ribbon Game Meet-Ups. Below is a list of times and places. You can also hold an unofficial ribbon meetup in Discord using #ribbon-collectors.",

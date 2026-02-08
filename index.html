@@ -3,18 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Ribbon NPC</title>
+  <title>ConRibbons NPC</title>
+
   <style>
     :root{
       --bg: #0b1020;
-      --panel: rgba(255,255,255,0.10);
-      --panel2: rgba(0,0,0,0.35);
+      --panel: rgba(0,0,0,0.55);
       --border: rgba(255,255,255,0.18);
       --text: #eef2ff;
-      --muted: rgba(238,242,255,0.75);
-      --accent: rgba(125,211,252,0.35);
+      --muted: rgba(238,242,255,0.78);
       --radius: 18px;
-      --shadow: 0 14px 30px rgba(0,0,0,0.35);
+      --shadow: 0 16px 34px rgba(0,0,0,0.45);
     }
 
     *{ box-sizing: border-box; }
@@ -22,82 +21,34 @@
       margin: 0;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
       color: var(--text);
+      min-height: 100vh;
+
+      /* NPC background image */
       background:
-        radial-gradient(900px 600px at 20% 10%, rgba(167,139,250,0.20), transparent 60%),
-        radial-gradient(900px 600px at 80% 20%, rgba(125,211,252,0.18), transparent 60%),
-        var(--bg);
+        linear-gradient(to bottom, rgba(11,16,32,0.45), rgba(11,16,32,0.75)),
+        url("./Config/BackgroundImage.png");
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+    }
+
+    /* Keep dialog near bottom like an RPG */
+    .hud{
       min-height: 100vh;
       display: grid;
-      place-items: center;
+      align-items: end;
       padding: 18px;
     }
 
-    .frame{
-      width: min(920px, 100%);
-      display: grid;
-      grid-template-columns: 280px 1fr;
-      gap: 16px;
-      align-items: start;
-    }
-
-    @media (max-width: 760px){
-      .frame{ grid-template-columns: 1fr; }
-    }
-
-    .npc{
+    .dialog{
+      width: min(980px, 100%);
+      margin: 0 auto;
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-      padding: 14px;
-      display: grid;
-      gap: 12px;
-    }
-
-    .npcFace{
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      border-radius: 16px;
-      border: 1px solid var(--border);
-      background:
-        radial-gradient(circle at 30% 25%, rgba(255,255,255,0.14), transparent 45%),
-        linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.05));
       overflow: hidden;
-      display: grid;
-      place-items: center;
-      user-select: none;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      transition: transform 0.06s ease;
-    }
-    .npcFace:active{ transform: translateY(1px); }
-
-    .npcFace img{
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    .npcName{
-      margin: 0;
-      font-size: 1.1rem;
-      letter-spacing: 0.2px;
-    }
-
-    .npcHint{
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.95rem;
-      line-height: 1.35;
-    }
-
-    .dialog{
-      background: var(--panel2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow: hidden;
+      backdrop-filter: blur(4px);
     }
 
     .dialogHeader{
@@ -120,17 +71,27 @@
       margin: 0;
       font-size: 1.05rem;
       line-height: 1.45;
+      white-space: pre-wrap; /* supports \n in your JSON text */
+    }
+
+    .nodePic{
+      width: 100%;
+      max-height: 260px;
+      object-fit: contain;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.14);
+      display: none;
     }
 
     .choices{
       display: grid;
       gap: 10px;
-      margin-top: 6px;
+      margin-top: 4px;
     }
 
     button.choice{
       appearance: none;
-      border: 1px solid var(--border);
+      border: 1px solid rgba(255,255,255,0.18);
       background: rgba(255,255,255,0.08);
       color: var(--text);
       padding: 12px 12px;
@@ -147,186 +108,75 @@
     }
     button.choice:active{ transform: translateY(1px); }
 
-    .kbd{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size: 0.85rem;
-      padding: 2px 8px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.12);
+    .toast{
+      position: fixed;
+      left: 18px;
+      bottom: 18px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(0,0,0,0.55);
+      border: 1px solid rgba(255,255,255,0.14);
       color: var(--muted);
-      white-space: nowrap;
-    }
-
-    .subtle{
-      color: var(--muted);
-      font-size: 0.92rem;
+      font-size: 0.9rem;
+      box-shadow: var(--shadow);
+      display: none;
+      backdrop-filter: blur(4px);
+      max-width: min(520px, calc(100% - 36px));
     }
   </style>
 </head>
 
 <body>
-  <div class="frame">
-    <!-- NPC panel -->
-    <section class="npc">
-      <div class="npcFace" id="npcTap" aria-label="Tap the NPC">
-        <!-- Replace with assets/npc.png when you have it -->
-        <img src="assets/npc.png" alt="NPC" onerror="this.style.display='none'; this.parentElement.textContent='🧑‍🎤'; this.parentElement.style.fontSize='64px';" />
-      </div>
-
-      <h2 class="npcName" id="npcName">Ribbon Keeper</h2>
-      <p class="npcHint" id="npcHint">Tap me to talk. I’ll offer choices like an RPG NPC.</p>
-      <p class="subtle">Tip: press <span class="kbd">1</span> <span class="kbd">2</span> <span class="kbd">3</span> to pick choices.</p>
-    </section>
-
-    <!-- Dialog box -->
+  <div class="hud">
     <section class="dialog" aria-label="NPC dialog">
       <div class="dialogHeader">
         <span id="speaker">💬 Ribbon Keeper</span>
-        <span id="status">Tap the NPC</span>
+        <span id="status">Loading…</span>
       </div>
 
       <div class="dialogBody">
-        <p class="line" id="dialogLine">…</p>
-
+        <p class="line" id="dialogLine">Loading…</p>
+        <img id="nodePic" class="nodePic" alt="Dialog image" />
         <div class="choices" id="choices"></div>
       </div>
     </section>
   </div>
 
+  <div class="toast" id="toast"></div>
+
 <script>
 let DIALOG = {};
 let currentNodeId = "start";
-let isActive = false;
 
 // UI
 const elSpeaker = document.getElementById("speaker");
 const elStatus  = document.getElementById("status");
 const elLine    = document.getElementById("dialogLine");
 const elChoices = document.getElementById("choices");
-const elNpcName = document.getElementById("npcName");
-const elNpcTap  = document.getElementById("npcTap");
-
-// Create an optional picture slot (simple)
-const pic = document.createElement("img");
-pic.style.width = "100%";
-pic.style.maxHeight = "260px";
-pic.style.objectFit = "contain";
-pic.style.borderRadius = "14px";
-pic.style.border = "1px solid rgba(255,255,255,0.14)";
-pic.style.display = "none";
-elLine.insertAdjacentElement("afterend", pic);
+const elPic     = document.getElementById("nodePic");
+const elToast   = document.getElementById("toast");
 
 async function loadConversations(){
   try {
-    const res = await fetch("./Config/Conversations.json", { cache: "no-store" });
+    // NOTE: this path is lowercase /config to match your earlier file location
+    const res = await fetch("./config/conversations.json", { cache: "no-store" });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     DIALOG = await res.json();
 
-    // Basic validation
     if (!DIALOG.start || !DIALOG.start.text) {
       throw new Error("Missing required node: start");
     }
 
-    elNpcName.textContent = "Ribbon Keeper";
-    elStatus.textContent = "Tap the NPC";
-    elLine.textContent = "Tap the NPC to begin.";
+    elStatus.textContent = "Choose an option";
+    render("start"); // Start automatically on page load ✅
   } catch (err) {
     elStatus.textContent = "Config load failed";
     elLine.textContent =
-      "Could not load ./Config/Conversations.json. Check that the file is valid JSON and committed to GitHub Pages.";
+      "Could not load ./config/conversations.json. Check file name/case and GitHub Pages path.";
+    elChoices.innerHTML = "";
+    elPic.style.display = "none";
     console.error(err);
   }
 }
 
 function render(nodeId){
-  const node = DIALOG[nodeId];
-  if (!node) {
-    elLine.textContent = `Missing node: "${nodeId}"`;
-    elChoices.innerHTML = "";
-    pic.style.display = "none";
-    return;
-  }
-
-  currentNodeId = nodeId;
-
-  // Speaker: if not provided in JSON, keep it simple
-  elSpeaker.textContent = "💬 Ribbon Keeper";
-  elLine.textContent = node.text ?? "";
-
-  // Picture support
-  if (node.picture_url) {
-    pic.src = node.picture_url;
-    pic.style.display = "block";
-  } else {
-    pic.style.display = "none";
-  }
-
-  // Choices
-  elChoices.innerHTML = "";
-  const choices = Array.isArray(node.choices) ? node.choices : [];
-
-  choices.forEach((c, idx) => {
-    const btn = document.createElement("button");
-    btn.className = "choice";
-    btn.type = "button";
-    btn.textContent = `${idx + 1}. ${c.label}`;
-
-    btn.addEventListener("click", () => {
-      // If it's a URL choice, open it
-      if (c.url) {
-        window.open(c.url, "_blank", "noopener,noreferrer");
-        return;
-      }
-
-      // Otherwise go to next node
-      if (c.next) {
-        elStatus.textContent = "…";
-        render(c.next);
-        elStatus.textContent = "Choose an option";
-        return;
-      }
-
-      // Neither url nor next? that's a config bug
-      elStatus.textContent = "Choice misconfigured";
-    });
-
-    elChoices.appendChild(btn);
-  });
-
-  // If no choices, show a simple back option
-  if (choices.length === 0) {
-    const back = document.createElement("button");
-    back.className = "choice";
-    back.type = "button";
-    back.textContent = "1. Back";
-    back.addEventListener("click", () => render("start"));
-    elChoices.appendChild(back);
-  }
-}
-
-function activate(){
-  isActive = true;
-  elStatus.textContent = "Choose an option";
-  render("start");
-}
-
-elNpcTap.addEventListener("click", activate);
-
-// Keyboard 1-9 to pick options
-window.addEventListener("keydown", (e) => {
-  if (!isActive) return;
-  const n = Number(e.key);
-  if (!Number.isInteger(n) || n < 1 || n > 9) return;
-
-  const buttons = [...elChoices.querySelectorAll("button.choice")];
-  const btn = buttons[n - 1];
-  if (btn) btn.click();
-});
-
-// Load config on startup
-loadConversations();
-</script>
-
-</body>
-</html>

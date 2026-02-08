@@ -190,7 +190,7 @@
 
   "share": {
     "text": "Yes — here is a QR Code you can share with another collector.\nThis website is also available here: https://random30515.github.io/ConRibbons/",
-    "picture_url": "./config/ImageQR.png",
+    "picture_url": "./Config/ImageQR.png",
     "choices": [
       { "label": "Back", "next": "start_again" }
     ]

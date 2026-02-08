@@ -159,7 +159,7 @@ const elToast   = document.getElementById("toast");
 async function loadConversations(){
   try {
     // NOTE: this path is lowercase /config to match your earlier file location
-    const res = await fetch("./config/conversations.json", { cache: "no-store" });
+    const res = await fetch("./Config/Conversations.json", { cache: "no-store" });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     DIALOG = await res.json();
 
@@ -172,7 +172,7 @@ async function loadConversations(){
   } catch (err) {
     elStatus.textContent = "Config load failed";
     elLine.textContent =
-      "Could not load ./config/conversations.json. Check file name/case and GitHub Pages path.";
+      "Could not load ./Config/Conversations.json. Check file name/case and GitHub Pages path.";
     elChoices.innerHTML = "";
     elPic.style.display = "none";
     console.error(err);

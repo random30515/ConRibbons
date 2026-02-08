@@ -4,7 +4,7 @@
     "choices": [
       { "label": "What is the Ribbon Game", "next": "about" },
       { "label": "Show me the Ribbons", "next": "ribbons" },
-      { "label": "I want to share you with another collector", "next": "share" },
+      { "label": "I want to share you with another collector (QR Code)", "next": "share" },
       { "label": "Are there any events around ribbons", "next": "events" }
     ]
   },
@@ -14,8 +14,8 @@
     "choices": [
       { "label": "What is the Ribbon Game", "next": "about" },
       { "label": "Show me the Ribbons", "next": "ribbons" },
-      { "label": "Are there any events around ribbons", "next": "events" },
-      { "label": "I want to share you with another collector", "next": "share" }
+      { "label": "I want to share you with another collector (QR Code)", "next": "share" },      
+      { "label": "Are there any events around ribbons", "next": "events" }
     ]
   },
 
@@ -190,7 +190,7 @@
 
   "share": {
     "text": "Yes — here is a QR Code you can share with another collector.\nThis website is also available here: https://random30515.github.io/ConRibbons/",
-    "picture_url": "./config/qr_code.png",
+    "picture_url": "./config/ImageQR.png",
     "choices": [
       { "label": "Back", "next": "start_again" }
     ]

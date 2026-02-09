@@ -117,7 +117,7 @@
   "about_suppliers": {
     "text": "If you would like to give out ribbons, please complete the Ribbon Update Form. Provide information like the ribbon name, how to earn it, and which days it will be available.",
     "choices": [
-      { "label": "Show me the Ribbon Update Form", "url": "https://forms.gle/ZTskB21MbTKyY96c7" },
+      { "label": "Show me the Ribbon Update Form", "action": "open_ribbon_form" },
       { "label": "Back", "next": "about", "action": "back" }
     ]
   },
@@ -125,7 +125,7 @@
   "about_discord": {
     "text": "You can join our Discord server to discuss ribbons and other Anime NebrasKon topics!",
     "choices": [
-      { "label": "Open the Discord server", "url": "https://discord.gg/AnimeNebrasKon" },
+      { "label": "Open the Discord server", "action": "open_discussion" },
       { "label": "Back", "next": "about", "action": "back" }
     ]
   },

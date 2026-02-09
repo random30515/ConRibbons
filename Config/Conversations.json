@@ -178,8 +178,10 @@
     "text": "Ribbon details:",
     "view": "ribbon_detail",
     "choices": [
-      { "label": "Back", "action": "back" },
-      { "label": "Ribbons menu", "next": "ribbons" }
+      { "label": "List of Ribbons by Dealer of Ribbon", "action": "detail_dealer" },
+      { "label": "List of Ribbons by Fandom of Ribbon", "action": "detail_fandom" },
+      { "label": "Ribbon Menu", "next": "ribbons" },
+      { "label": "Back", "action": "back" }
     ]
   },
 

@@ -316,27 +316,73 @@ function handleChoice(c){
     window.open(c.url, "_blank", "noopener,noreferrer");
     return;
   }
-  if (c.action === "back_view") {
-    const prev = VIEW_STACK.pop();
-    if (prev) {
-      // Restore previous view state
-      render(prev.nodeId);
-      // then re-render that view's content (it will use prev.viewState)
-      prev.restore();
-    }
-    return;
-  }
-  if (c.next) {
-    // Save current state so Back returns here
-    pushNav(currentNodeId, CURRENT_LIST_RESTORE || (() => {}));
-    render(c.next);
-    return;
-  }
+
   if (c.action === "back") {
     goBack();
     return;
   }
-  elStatus.textContent = "Choice misconfigured";
+
+  // ✅ NEW: From ribbon detail → show grid for same dealer
+  if (c.action === "detail_dealer") {
+    if (!CURRENT_DETAIL) return;
+
+    const dealerName = (CURRENT_DETAIL.dealer || "").trim();
+    if (!dealerName) return;
+
+    // Push history so Back returns to detail
+    pushNav("ribbon_detail", () => {
+      CURRENT_DETAIL && render("ribbon_detail");
+    });
+
+    // Set restore so clicking a ribbon from this grid can return here
+    const restoreDealerGrid = () => {
+      elContent.innerHTML = "";
+      renderRibbonGrid(
+        RIBBONS.filter(r => (r.dealer || "").trim() === dealerName),
+        `Dealer: ${dealerName}`
+      );
+    };
+    CURRENT_LIST_RESTORE = restoreDealerGrid;
+
+    // Move to the dealer node (so header/text make sense), then show grid
+    render("ribbons_dealers");
+    restoreDealerGrid();
+    return;
+  }
+
+  // ✅ NEW: From ribbon detail → show grid for same fandom
+  if (c.action === "detail_fandom") {
+    if (!CURRENT_DETAIL) return;
+
+    const fandomName = (CURRENT_DETAIL.fandom || "").trim();
+    if (!fandomName) return;
+
+    pushNav("ribbon_detail", () => {
+      CURRENT_DETAIL && render("ribbon_detail");
+    });
+
+    const restoreFandomGrid = () => {
+      elContent.innerHTML = "";
+      renderRibbonGrid(
+        RIBBONS.filter(r => (r.fandom || "").trim() === fandomName),
+        `Fandom: ${fandomName}`
+      );
+    };
+    CURRENT_LIST_RESTORE = restoreFandomGrid;
+
+    render("ribbons_fandoms");
+    restoreFandomGrid();
+    return;
+  }
+
+  // Normal navigation
+  if (c.next) {
+    pushNav(currentNodeId, CURRENT_LIST_RESTORE || (() => {}));
+    render(c.next);
+    return;
+  }
+
+  console.warn("Choice misconfigured:", c);
 }
 
 function renderView(viewName){

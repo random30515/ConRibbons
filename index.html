@@ -599,6 +599,19 @@ function goBack(){
   setTimeout(() => (SUPPRESS_HASH = false), 0);
 }
 
+function shareApp(){
+  const shareData = {
+    title: APP_CONFIG.convention_name || "Ribbon Collector",
+    text: `Check out the Ribbon Collector at ${APP_CONFIG.convention_name}! 🎀`,
+    url: APP_CONFIG.app_url || window.location.href
+  };
+
+  if (navigator.share) {
+    navigator.share(shareData).catch(() => {});
+  } else {
+    fallbackShare(shareData);
+  }
+}
 
 loadAll().catch(err => {
   elStatus.textContent = "Load failed";

@@ -402,7 +402,7 @@ function handleChoice(c){
     };
     CURRENT_LIST_RESTORE = restoreFandomGrid;
 
-    render("ribbons_fandoms");
+    render("ribbons_fandom");
     restoreFandomGrid();
     return;
   }
@@ -490,7 +490,7 @@ function renderFandoms(){
 
     btn.addEventListener("click", () => {
       // Save where we came from: fandom list
-      pushNav("ribbons_fandoms", () => {
+      pushNav("ribbons_fandom", () => {
         elContent.innerHTML = "";
         renderFandoms();
       });

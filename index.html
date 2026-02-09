@@ -218,6 +218,7 @@ let RIBBONS = [];
 let VIEW_STACK = []; // for "back_view"
 let CURRENT_DETAIL = null;
 let CURRENT_LIST_RESTORE = null;
+let APP_CONFIG = {};
 
 // UI
 const elSpeaker = document.getElementById("speaker");
@@ -232,9 +233,18 @@ const NAV_HISTORY = [];   // stack of { nodeId, restore }
 let SUPPRESS_HASH = false;
 
 async function loadAll(){
-  await Promise.all([loadConversations(), loadRibbonsCsv()]);
-  elStatus.textContent = "Choose an option";
-  render("start"); // start on load
+  await Promise.all([
+    loadAppConfig(),
+    loadConversations(),
+    loadRibbonsCsv()
+  ]);
+  render("start");
+}
+
+async function loadAppConfig(){
+  const res = await fetch("./Config/app_config.json", { cache: "no-store" });
+  if (!res.ok) throw new Error(`app_config.json HTTP ${res.status}`);
+  APP_CONFIG = await res.json();
 }
 
 async function loadConversations(){
@@ -319,6 +329,20 @@ function handleChoice(c){
 
   if (c.action === "back") {
     goBack();
+    return;
+  }
+
+  if (c.action === "open_discussion") {
+    if (APP_CONFIG.discussion_board) {
+      window.open(APP_CONFIG.discussion_board, "_blank", "noopener,noreferrer");
+    }
+    return;
+  }
+  
+  if (c.action === "open_ribbon_form") {
+    if (APP_CONFIG.ribbon_form) {
+      window.open(APP_CONFIG.ribbon_form, "_blank", "noopener,noreferrer");
+    }
     return;
   }
 

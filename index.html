@@ -58,9 +58,18 @@
       border-bottom: 1px solid rgba(255,255,255,0.10);
       display: flex;
       justify-content: space-between;
+      align-items: center;
       gap: 10px;
-      color: var(--muted);
-      font-size: 0.92rem;
+    }
+
+    #headerTitle{
+      font-weight: 800;
+      letter-spacing: 0.3px;
+    }
+
+    #headerApp{
+      font-size: 0.9rem;
+      color: rgba(238,242,255,0.75);
     }
 
     .dialogBody{
@@ -194,8 +203,8 @@
   <div class="hud">
     <section class="dialog" aria-label="NPC dialog">
       <div class="dialogHeader">
-        <span id="speaker">💬 Ribbon Keeper</span>
-        <span id="status">Loading…</span>
+        <span id="headerTitle"></span>
+        <span id="headerApp"></span>
       </div>
 
       <div class="dialogBody">
@@ -221,8 +230,8 @@ let CURRENT_LIST_RESTORE = null;
 let APP_CONFIG = {};
 
 // UI
-const elSpeaker = document.getElementById("speaker");
-const elStatus  = document.getElementById("status");
+const elHeaderTitle = document.getElementById("headerTitle");
+const elHeaderApp   = document.getElementById("headerApp");
 const elLine    = document.getElementById("dialogLine");
 const elChoices = document.getElementById("choices");
 const elPic     = document.getElementById("nodePic");   // if you kept picture_url support
@@ -238,6 +247,7 @@ async function loadAll(){
     loadConversations(),
     loadRibbonsCsv()
   ]);
+  applyHeader();
   render("start");
 }
 
@@ -581,6 +591,14 @@ function renderRibbonDetail(r){
 
 function pushViewState(nodeId, restoreFn){
   VIEW_STACK.push({ nodeId, restore: restoreFn });
+}
+
+function applyHeader(){
+  elHeaderTitle.textContent =
+    APP_CONFIG.convention_name || "Convention";
+
+  elHeaderApp.textContent =
+    APP_CONFIG.app_name || "App";
 }
 
 // Keyboard: 1–9 selects visible buttons (choices first, then view buttons)

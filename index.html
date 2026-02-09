@@ -302,7 +302,6 @@ function render(nodeId){
 
   elSpeaker.textContent = "💬 Ribbon Keeper";
   elLine.textContent = node.text ?? "";
-  elStatus.textContent = "Choose an option";
 
   // Optional picture_url support (if you kept it)
   if (elPic) {
@@ -656,7 +655,6 @@ function shareApp(){
 }
 
 loadAll().catch(err => {
-  elStatus.textContent = "Load failed";
   elLine.textContent = "Could not load config or CSV. Check paths/case and commits.";
   console.error(err);
 });

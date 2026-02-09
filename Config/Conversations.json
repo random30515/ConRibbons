@@ -178,10 +178,10 @@
     "text": "Ribbon details:",
     "view": "ribbon_detail",
     "choices": [
-      { "label": "Back to previous list", "action": "back_view" },
-      { "label": "Back", "next": "ribbons", "action": "back" }
+      { "label": "Back", "action": "back" },
+      { "label": "Ribbons menu", "next": "ribbons" }
     ]
-  },  
+  },
 
   "events": {
     "text": "Of course! There are Ribbon Game Meet-Ups. Below is a list of times and places. You can also hold an unofficial ribbon meetup in Discord using #ribbon-collectors.",

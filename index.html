@@ -317,9 +317,10 @@ function render(nodeId){
   const choices = Array.isArray(node.choices) ? node.choices : [];
   choices.forEach((c, idx) => {
     const btn = document.createElement("button");
+    const label = resolveLabel(c) || "(missing label)";
     btn.className = "choice";
     btn.type = "button";
-    btn.textContent = `${idx + 1}. ${c.label}`;
+    btn.textContent = `${idx + 1}. ${label}`;
     btn.addEventListener("click", () => handleChoice(c));
     elChoices.appendChild(btn);
   });
@@ -589,6 +590,15 @@ function renderRibbonDetail(r){
 
 function pushViewState(nodeId, restoreFn){
   VIEW_STACK.push({ nodeId, restore: restoreFn });
+}
+
+function resolveLabel(choice){
+  if (choice.label_template && CURRENT_DETAIL) {
+    return choice.label_template
+      .replace(/\{\{dealer\}\}/g, CURRENT_DETAIL.dealer || "Dealer")
+      .replace(/\{\{fandom\}\}/g, CURRENT_DETAIL.fandom || "Fandom");
+  }
+  return choice.label;
 }
 
 function applyHeader(){

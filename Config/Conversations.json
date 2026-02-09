@@ -26,14 +26,14 @@
       { "label": "How do I find ribbons?", "next": "about_find" },
       { "label": "What if I want to give out ribbons?", "next": "about_suppliers" },
       { "label": "Do I need my own ribbons to play?", "next": "about_need" },
-      { "label": "Where can I join the discussion on ribbons and more about Anime NebrasKon?", "next": "about_discord" },
+      { "label": "Where can I join the discussion boards?", "next": "about_discord" },
       { "label": "Who has contributed to this collector album?", "next": "about_credits" },
       { "label": "🏠 Thanks, let's talk ribbons!", "next": "start_again", "action": "back" }
     ]
   },
 
   "about_find": {
-    "text": "Look for ribbon dealers in Artist Alley or vendor areas, watch for announcements, and talk to other collectors—ribbons are meant to start conversations.",
+    "text": "Look for ribbon dealers in the vendor areas, watch for announcements, and talk to other collectors—ribbons are meant to start conversations.",
     "choices": [
       { "label": "Tell me more about ribbons", "next": "about_types" },
       { "label": "Back", "next": "about", "action": "back" }
@@ -129,7 +129,7 @@
   },
 
   "about_discord": {
-    "text": "You can join our Discord server to discuss ribbons and other Anime NebrasKon topics!",
+    "text": "You can join our Discord server to discuss ribbons and convention topics.",
     "choices": [
       { "label": "Open the Discord server", "action": "open_discussion" },
       { "label": "Back", "next": "about", "action": "back" }
@@ -157,7 +157,7 @@
   },
 
   "ribbons_dealers": {
-    "text": "Sure — dealer list isn’t wired yet. (Placeholder)",
+    "text": "Sure, here are a list of dealers giving out ribbons.",
     "view": "dealers",
     "choices": [
       { "label": "Back", "next": "ribbons", "action": "back" }
@@ -165,7 +165,7 @@
   },
 
   "ribbons_fandom": {
-    "text": "Sure — fandom list isn’t wired yet. (Placeholder)",
+    "text": "Sure, here are a list of fandoms being offered right now.",
     "view": "fandoms",
     "choices": [
       { "label": "Back", "next": "ribbons", "action": "back" }
@@ -173,7 +173,7 @@
   },
 
   "ribbons_all": {
-    "text": "All-ribbons list isn’t wired yet. (Placeholder)",
+    "text": "Sure, here is a list of all of the ribbons.",
     "view": "all_ribbons",
     "choices": [
       { "label": "Back", "next": "ribbons", "action": "back" }
@@ -184,10 +184,22 @@
     "text": "Ribbon details:",
     "view": "ribbon_detail",
     "choices": [
-      { "label": "List of Ribbons by Dealer of Ribbon", "action": "detail_dealer" },
-      { "label": "List of Ribbons by Fandom of Ribbon", "action": "detail_fandom" },
-      { "label": "Ribbon Menu", "next": "ribbons" },
-      { "label": "Back", "action": "back" }
+      {
+        "label_template": "Ribbons by {{dealer}}",
+        "action": "detail_dealer"
+      },
+      {
+        "label_template": "Ribbons by {{fandom}}",
+        "action": "detail_fandom"
+      },
+      {
+        "label": "Ribbon Menu",
+        "next": "ribbons"
+      },
+      {
+        "label": "Back",
+        "action": "back"
+      }
     ]
   },
 

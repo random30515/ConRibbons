@@ -28,7 +28,7 @@
       { "label": "Do I need my own ribbons to play?", "next": "about_need" },
       { "label": "Where can I join the discussion on ribbons and more about Anime NebrasKon?", "next": "about_discord" },
       { "label": "Who has contributed to this collector album?", "next": "about_credits" },
-      { "label": "Will you help me collect more ribbons?", "next": "start_again" }
+      { "label": "Will you help me collect more ribbons?", "next": "start_again", "action": "back" }
     ]
   },
 
@@ -36,7 +36,7 @@
     "text": "Look for ribbon dealers in Artist Alley or vendor areas, watch for announcements, and talk to other collectors—ribbons are meant to start conversations.",
     "choices": [
       { "label": "Tell me more about ribbons", "next": "about_types" },
-      { "label": "Back", "next": "about" }
+      { "label": "Back", "next": "about", "action": "back" }
     ]
   },
 
@@ -48,7 +48,7 @@
       { "label": "Connection", "next": "about_type_connect" },
       { "label": "Action", "next": "about_type_action" },
       { "label": "Exclusive", "next": "about_type_exclusive" },
-      { "label": "Back", "next": "about" }
+      { "label": "Back", "next": "about", "action": "back" }
     ]
   },
 
@@ -59,7 +59,7 @@
       { "label": "Connection", "next": "about_type_connect" },
       { "label": "Action", "next": "about_type_action" },
       { "label": "Exclusive", "next": "about_type_exclusive" },
-      { "label": "Back", "next": "about_types" }
+      { "label": "Back", "next": "about_types", "action": "back" }
     ]
   },
 
@@ -70,7 +70,7 @@
       { "label": "Connection", "next": "about_type_connect" },
       { "label": "Action", "next": "about_type_action" },
       { "label": "Exclusive", "next": "about_type_exclusive" },
-      { "label": "Back", "next": "about_types" }
+      { "label": "Back", "next": "about_types", "action": "back" }
     ]
   },
 
@@ -81,7 +81,7 @@
       { "label": "Achievement", "next": "about_type_achieve" },
       { "label": "Action", "next": "about_type_action" },
       { "label": "Exclusive", "next": "about_type_exclusive" },
-      { "label": "Back", "next": "about_types" }
+      { "label": "Back", "next": "about_types", "action": "back" }
     ]
   },
 
@@ -92,7 +92,7 @@
       { "label": "Achievement", "next": "about_type_achieve" },
       { "label": "Connection", "next": "about_type_connect" },
       { "label": "Exclusive", "next": "about_type_exclusive" },
-      { "label": "Back", "next": "about_types" }
+      { "label": "Back", "next": "about_types", "action": "back" }
     ]
   },
 
@@ -103,14 +103,14 @@
       { "label": "Achievement", "next": "about_type_achieve" },
       { "label": "Connection", "next": "about_type_connect" },
       { "label": "Action", "next": "about_type_action" },
-      { "label": "Back", "next": "about_types" }
+      { "label": "Back", "next": "about_types", "action": "back" }
     ]
   },
 
   "about_need": {
     "text": "Of course not. Collecting is free for everyone to do.",
     "choices": [
-      { "label": "Back", "next": "about" }
+      { "label": "Back", "next": "about", "action": "back" }
     ]
   },
 
@@ -118,7 +118,7 @@
     "text": "If you would like to give out ribbons, please complete the Ribbon Update Form. Provide information like the ribbon name, how to earn it, and which days it will be available.",
     "choices": [
       { "label": "Show me the Ribbon Update Form", "url": "https://forms.gle/ZTskB21MbTKyY96c7" },
-      { "label": "Back", "next": "about" }
+      { "label": "Back", "next": "about", "action": "back" }
     ]
   },
 
@@ -126,7 +126,7 @@
     "text": "You can join our Discord server to discuss ribbons and other Anime NebrasKon topics!",
     "choices": [
       { "label": "Open the Discord server", "url": "https://discord.gg/AnimeNebrasKon" },
-      { "label": "Back", "next": "about" }
+      { "label": "Back", "next": "about", "action": "back" }
     ]
   },
 
@@ -136,7 +136,7 @@
       { "label": "equinoxdoodles at Youmacon Virtual Collector's Album", "url": "https://docs.google.com/spreadsheets/d/1aPjje-rhUCYEZQv5YhesGeubb22otoTiTXURPArlWpI/edit#gid=1870883671" },
       { "label": "AMKE 2025 Virtual Collector's Album", "url": "https://docs.google.com/spreadsheets/d/1Xe5TOfK0Xw7wJHjRLC-rFubmjfSrJ8tuRCPUfknB-n0/edit?gid=1870883671#gid=1870883671" },
       { "label": "conRibbons NPC Conversation (this website)", "url": "https://github.com/random30515/ConRibbons" },
-      { "label": "Back", "next": "about" }
+      { "label": "Back", "next": "about", "action": "back" }
     ]
   },
 
@@ -146,7 +146,7 @@
       { "label": "Show me a dealers list", "next": "ribbons_dealers" },
       { "label": "Show me a fandom list", "next": "ribbons_fandom" },
       { "label": "Show me a list of all ribbons", "next": "ribbons_all" },
-      { "label": "Back", "next": "start_again" }
+      { "label": "Back", "next": "start_again", "action": "back" }
     ]
   },
 
@@ -154,7 +154,7 @@
     "text": "Sure — dealer list isn’t wired yet. (Placeholder)",
     "view": "dealers",
     "choices": [
-      { "label": "Back", "next": "ribbons" }
+      { "label": "Back", "next": "ribbons", "action": "back" }
     ]
   },
 
@@ -162,7 +162,7 @@
     "text": "Sure — fandom list isn’t wired yet. (Placeholder)",
     "view": "fandoms",
     "choices": [
-      { "label": "Back", "next": "ribbons" }
+      { "label": "Back", "next": "ribbons", "action": "back" }
     ]
   },
 
@@ -170,7 +170,7 @@
     "text": "All-ribbons list isn’t wired yet. (Placeholder)",
     "view": "all_ribbons",
     "choices": [
-      { "label": "Back", "next": "ribbons" }
+      { "label": "Back", "next": "ribbons", "action": "back" }
     ]
   },
 
@@ -179,7 +179,7 @@
     "view": "ribbon_detail",
     "choices": [
       { "label": "Back to previous list", "action": "back_view" },
-      { "label": "Back", "next": "ribbons" }
+      { "label": "Back", "next": "ribbons", "action": "back" }
     ]
   },  
 
@@ -188,7 +188,7 @@
     "choices": [
       { "label": "<TBA - Placeholder> Saturday Afternoon", "next": "events_session1" },
       { "label": "Show me the Discord Server", "next": "about_discord" },
-      { "label": "Back", "next": "start_again" }
+      { "label": "Back", "next": "start_again", "action": "back" }
     ]
   },
 
@@ -196,7 +196,7 @@
     "text": "<CAUTION, THIS IS A PLACEHOLDER ONLY> Ah yes, join me in Ballroom D on Saturday at 2PM.",
     "choices": [
       { "label": "Back to events", "next": "events" },
-      { "label": "Back", "next": "start_again" }
+      { "label": "Back", "next": "start_again", "action": "back" }
     ]
   },
 
@@ -204,7 +204,7 @@
     "text": "Yes — here is a QR Code you can share with another collector.\nThis website is also available here: https://random30515.github.io/ConRibbons/",
     "picture_url": "./Config/ImageQR.png",
     "choices": [
-      { "label": "Back", "next": "start_again" }
+      { "label": "Back", "next": "start_again", "action": "back" }
     ]
   }
 }

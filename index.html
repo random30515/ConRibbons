@@ -226,6 +226,10 @@ const elChoices = document.getElementById("choices");
 const elPic     = document.getElementById("nodePic");   // if you kept picture_url support
 const elContent = document.getElementById("contentArea");
 
+// Back Button Support
+const NAV_HISTORY = [];   // stack of { nodeId, restore }
+let SUPPRESS_HASH = false;
+
 async function loadAll(){
   await Promise.all([loadConversations(), loadRibbonsCsv()]);
   elStatus.textContent = "Choose an option";
@@ -322,7 +326,13 @@ function handleChoice(c){
     return;
   }
   if (c.next) {
+    // Save current state so Back returns here
+    pushNav(currentNodeId, CURRENT_LIST_RESTORE || (() => {}));
     render(c.next);
+    return;
+  }
+  if (c.action === "back") {
+    goBack();
     return;
   }
   elStatus.textContent = "Choice misconfigured";
@@ -356,10 +366,32 @@ function renderDealers(){
     btn.className = "choice";
     btn.type = "button";
     btn.textContent = name;
+
     btn.addEventListener("click", () => {
-      pushViewState("ribbons_dealers", () => renderDealers());
-      renderRibbonGrid(RIBBONS.filter(r => r.dealer === name), `Dealer: ${name}`);
+      // 1) Save where we came from: the dealer list view
+      //    (so browser back from "Dealer: X" returns to the dealer list)
+      pushNav("ribbons_dealers", () => {
+        elContent.innerHTML = "";
+        renderDealers();
+      });
+
+      // 2) Define how to restore THIS dealer's grid (so back from detail returns to the grid)
+      const restoreThisDealerGrid = () => {
+        elContent.innerHTML = "";
+        renderRibbonGrid(
+          RIBBONS.filter(r => (r.dealer || "").trim() === name),
+          `Dealer: ${name}`
+        );
+      };
+
+      // 3) Set current list restore so detail can go "back to previous list" properly
+      CURRENT_LIST_RESTORE = restoreThisDealerGrid;
+
+      // 4) Render the dealer's grid now
+      elContent.innerHTML = "";
+      restoreThisDealerGrid();
     });
+
     wrap.appendChild(btn);
   });
 
@@ -376,10 +408,29 @@ function renderFandoms(){
     btn.className = "choice";
     btn.type = "button";
     btn.textContent = name;
+
     btn.addEventListener("click", () => {
-      pushViewState("ribbons_fandoms", () => renderFandoms());
-      renderRibbonGrid(RIBBONS.filter(r => r.fandom === name), `Fandom: ${name}`);
+      // Save where we came from: fandom list
+      pushNav("ribbons_fandoms", () => {
+        elContent.innerHTML = "";
+        renderFandoms();
+      });
+
+      // Restore function for THIS fandom grid
+      const restoreThisFandomGrid = () => {
+        elContent.innerHTML = "";
+        renderRibbonGrid(
+          RIBBONS.filter(r => (r.fandom || "").trim() === name),
+          `Fandom: ${name}`
+        );
+      };
+
+      CURRENT_LIST_RESTORE = restoreThisFandomGrid;
+
+      elContent.innerHTML = "";
+      restoreThisFandomGrid();
     });
+
     wrap.appendChild(btn);
   });
 
@@ -414,16 +465,17 @@ function renderRibbonGrid(rows, title){
     `;
 
     tile.addEventListener("click", () => {
-      // Save how we got here so "Back to previous list" works
-      pushViewState(currentNodeId, () => {
-        // We don't know which list function, but the caller pushed before entering the grid for dealer/fandom.
-        // For All, we’ll just re-render all.
-        if (currentNodeId === "ribbons_all") renderAllRibbons();
-      });
+      // Save the CURRENT GRID state (dealer / fandom / all),
+      // not the dealer list
+      pushNav(
+        currentNodeId,
+        CURRENT_LIST_RESTORE || (() => {})
+      );
 
       CURRENT_DETAIL = r;
       render("ribbon_detail");
     });
+
 
     grid.appendChild(tile);
   });
@@ -479,11 +531,39 @@ function escapeHtml(str){
   }[m]));
 }
 
+function pushNav(nodeId, restoreFn){
+  NAV_HISTORY.push({ nodeId, restore: restoreFn });
+
+  // set hash so browser back becomes "conversation back"
+  SUPPRESS_HASH = true;
+  location.hash = `#n=${NAV_HISTORY.length}`;
+  setTimeout(() => (SUPPRESS_HASH = false), 0);
+}
+
+function goBack(){
+  const prev = NAV_HISTORY.pop();
+  if (!prev) return;
+
+  render(prev.nodeId);
+  if (typeof prev.restore === "function") prev.restore();
+
+  SUPPRESS_HASH = true;
+  location.hash = `#n=${NAV_HISTORY.length}`;
+  setTimeout(() => (SUPPRESS_HASH = false), 0);
+}
+
+
 loadAll().catch(err => {
   elStatus.textContent = "Load failed";
   elLine.textContent = "Could not load config or CSV. Check paths/case and commits.";
   console.error(err);
 });
+
+window.addEventListener("hashchange", () => {
+  if (SUPPRESS_HASH) return;
+  goBack();
+});
+
 </script>
 
 </body>

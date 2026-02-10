@@ -1,6 +1,6 @@
 {
   "start": {
-    "text": "Welcome, ribbon collector! Want to talk about ribbons?",
+    "text": "Welcome, fellow ribbon collector! Want to talk about ribbons?",
     "choices": [
       { "label": "What is the Ribbon Game", "next": "about" },
       { "label": "Show me the Ribbons", "next": "ribbons" },

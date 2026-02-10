@@ -185,11 +185,11 @@
     "view": "ribbon_detail",
     "choices": [
       {
-        "label_template": "Ribbons by {{dealer}}",
+        "label_template": "Ribbons from {{dealer}}",
         "action": "detail_dealer"
       },
       {
-        "label_template": "Ribbons by {{fandom}}",
+        "label_template": "Ribbons of {{fandom}} fandom",
         "action": "detail_fandom"
       },
       {

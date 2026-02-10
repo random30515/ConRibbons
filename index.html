@@ -613,7 +613,7 @@ function applyHeader(){
   elHeaderApp.textContent =
     APP_CONFIG.app_name || "App";
 
-  document.title = APP_CONFIG.convention_name || " " || APP_CONFIG.app_name;
+  document.title = `${APP_CONFIG.convention_name} ${APP_CONFIG.app_name}`;
 }
 
 // Keyboard: 1–9 selects visible buttons (choices first, then view buttons)
@@ -658,7 +658,7 @@ function goBack(){
 
 function shareApp(){
   const shareData = {
-    title: APP_CONFIG.convention_name || " " || APP_CONFIG.app_name ,
+    title: `${APP_CONFIG.convention_name} ${APP_CONFIG.app_name}`,
     text: `Check out the Ribbon Album at ${APP_CONFIG.convention_name}! 🎀`,
     url: APP_CONFIG.app_url || window.location.href
   };

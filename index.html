@@ -382,6 +382,11 @@ function handleChoice(c){
     restoreDealerGrid();
     return;
   }
+  
+  if (c.action === "share") {
+    shareApp();
+    return;
+  }
 
   // ✅ NEW: From ribbon detail → show grid for same fandom
   if (c.action === "detail_fandom") {
